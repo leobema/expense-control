@@ -1,19 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddSale from '../components/AddSale'
 import UpdateSale from '../components/UpdateSale'
+import axios from 'axios'
 //import AuthContext from "../AuthContext";
 
+const endpoint = 'http://localhost:8000/api'
 
 function Sales() {
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const [ sales, setSales ] = useState ([]);
+  const [updateSale, setUpdateSale] = useState([]);
   //const [showSaleModal, setShowSaleModal] = useState(false);
   const [showSalesModal, setShowSalesModal] = useState(false);
  // const [updatePage, setUpdatePage] = useState(true);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [ filteredSales, setFilteredSales ] = useState([]);
+  const [searchTerm, setSearchTerm] = useState();
  
+    useEffect ( () => {
+      getAllSales()
+    }, [])  
+
+    const getAllSales = async () => {
+      try {
+        const response = await axios.get(`${endpoint}/sales`);
+        setSales(response.data);
+        setFilteredSales(response.data); // Initialize filtered products with all products
+      } catch (error) {
+        console.error("Error fetching sales:", error);
+      }
+    };
+  
+    const deleteSale = async (id) => {
+      try {
+        await axios.delete(`${endpoint}/sale/${id}`);
+        setSales(sales.filter(sale => sale.id !== id));
+        setFilteredSales(filteredSales.filter(sale => sale.id !== id));
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
+    };
 
 
  // const authContext = useContext(AuthContext);
 
+    const handlePageUpdate = () => {
+      getAllSales();
+    };
 
     // Modal for Sale ADD
     const addSaleModalSetting = () => {
@@ -22,10 +55,28 @@ function Sales() {
   
     // Modal for Product UPDATE
     const updateProductModalSetting = (productId) => {
-      setSelectedSalesId(productId);
+      setSelectedSaleId(productId);
       // Lógica para mostrar el modal aquí
     };
 
+   // Handle Search Term
+const handleSearchTerm = (e) => {
+  const term = e.target.value.toLowerCase(); // Convertir el término de búsqueda a minúsculas
+  setSearchTerm(term); // Establecer el término de búsqueda en el estado
+
+  // Filtrar ventas basados en el término de búsqueda
+  const filteredSales = sales.filter(sale =>
+    sale.product.toLowerCase().includes(term) || // Filtrar por nombre de producto
+    sale.design.toLowerCase().includes(term) || // Filtrar por nombre de diseño
+    sale.client.toLowerCase().includes(term) || // Filtrar por nombre de cliente
+    sale.saleschannel.toLowerCase().includes(term) || // Filtrar por canal de venta
+    sale.methodpay.toLowerCase().includes(term) || // Filtrar por método de pago
+    sale.description.toLowerCase().includes(term) // Filtrar por descripción
+  );
+
+  // Actualizar la lista de ventas filtradas o mostrar todas las ventas si el término de búsqueda está vacío
+  setFilteredSales(term ? filteredSales : sales);
+};
 
 
   return (
@@ -133,14 +184,14 @@ function Sales() {
 
         {showSalesModal && (
           <AddSale
-            addProductModalSetting={addProductModalSetting}
+            addSaleModalSetting={addSaleModalSetting}
             handlePageUpdate={handlePageUpdate}
           />
         )}
         {showUpdateModal && (
            <UpdateSale
-            productId={selectedProductId}
-            updateProductData={updateProduct}
+            saleId={selectedSaleId}
+            updateProductData={updateSale}
             updateModalSetting={updateProductModalSetting}
             handlePageUpdate={handlePageUpdate}
           /> 
@@ -151,6 +202,20 @@ function Sales() {
           <div className="flex justify-between pt-5 pb-3 px-3">
             <div className="flex gap-4 justify-center items-center ">
               <span className="font-bold">Ventas</span>
+              <div className="flex justify-center items-center px-2 border-2 rounded-md ">
+                <img
+                  alt="search-icon"
+                  className="w-5 h-5"
+                  src={require("../assets/search-icon.png")}
+                />
+                <input
+                  className="border-none outline-none focus:border-none text-xs"
+                  type="text"
+                  placeholder="buscar venta"
+                  value={searchTerm}
+                  onChange={handleSearchTerm}
+                />
+              </div>
             </div>
             <div className="flex gap-4">
               <button
@@ -172,13 +237,19 @@ function Sales() {
                   Diseño
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Tipo de Venta
+                  Cliente
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Und Vendidas
+                  Canal de Venta
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Precio/und
+                  Método de Pago
+                </th>
+                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  Und
+                </th>
+                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  Precio
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                   Total $
@@ -196,45 +267,58 @@ function Sales() {
             </thead>
 
             <tbody className="divide-y divide-gray-200">
-                  <tr>
+            {filteredSales.map((sale) => ( 
+                  <tr key={sale.id}>
                     <td className="whitespace-nowrap px-4 py-2  text-gray-900">
-                     text
+                    {sale.product}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.design}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.client}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.saleschannel}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.methodpay}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.stock}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {sale.price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     text
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    {sale.date}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    {sale.description}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                       <span
                         className="text-green-700 cursor-pointer"
+                        onClick={() => {
+                          setSelectedSaleId(sale.id);
+                          setShowUpdateModal(true);
+                          setUpdateSale(sale); 
+                        }}
                       >
                         Editar{" "}
                       </span>
                       <span
                         className="text-red-600 px-2 cursor-pointer"
-                        // onClick={() => deleteItem()}
+                        onClick={() => deleteSale(sale.id)}
                       >
                         Borrar
                       </span>
                     </td>
                   </tr>
+                  ))}
             </tbody>
           </table>
         </div>

@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SaleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,10 @@ Route::controller(ProductController::class)->group(function (){
     Route::delete('/product/{id}', 'destroy');
 });
 
+Route::controller(SaleController::class)->group(function (){
+    Route::get('/sales', 'index');
+    Route::post('/sale', 'store');
+    Route::get('/sale/{id}', 'show');
+    Route::put('/sale/{id}', 'update');
+    Route::delete('/sale/{id}', 'destroy');
+});

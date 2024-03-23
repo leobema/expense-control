@@ -5,14 +5,18 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const endpoint = 'http://localhost:8000/api/product/'
+const endpoint = 'http://localhost:8000/api/sale/'
 
 const CreateSale = () => {
   
   const [product, setProduct] = useState('')
   const [design, setDesign] = useState('')
+  const [client, setClient] = useState('')
   const [stock, setStock] = useState(0)
   const [price, setPrice] = useState(0)
+  const [date, setDate] = useState('')
+  const [saleschannel, setSalesChannel] = useState('')
+  const [methodpay, setMethodPay] = useState('')
   const [description, setDescription] = useState('')
   const navigate = useNavigate()
 
@@ -21,13 +25,17 @@ const CreateSale = () => {
     await axios.post(endpoint, {
       product: product, 
       design: design, 
+      client: client,
       stock: stock,
+      saleschannel: saleschannel,
+      methodpay: methodpay,
       price: price,
+      date: date,
       description: description,
     })
     setOpen(false);
     window.location.reload(); // Recargar la página
-    navigate('/inventory')
+    navigate('/sales')
   }
 
 
@@ -103,49 +111,106 @@ const CreateSale = () => {
                         <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
                           <div className="col-span-2">
                               <div className="grid gap-4 my-2 grid-cols-2">
-                                <div>
-                                  <label
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                  >
-                                    Diseño 
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={design}
-                                    onChange={ (e)=> setDesign(e.target.value)}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="Ej. Sonic"
-                                  />
-                                </div>
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Diseño 
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={design}
+                                      onChange={ (e)=> setDesign(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      placeholder="Ej. Sonic"
+                                    />
+                                  </div>
 
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Stock 
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={stock}
+                                      onChange={ (e)=> setStock(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      placeholder="0 - 999"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Cliente 
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client}
+                                      onChange={ (e)=> setClient(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      placeholder="Nombre cliente"
+                                    />
+                                  </div>
                                 <div>
                                   <label
                                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                   >
-                                    Stock 
+                                    Precio
                                   </label>
                                   <input
                                     type="number"
-                                    value={stock}
-                                    onChange={ (e)=> setStock(e.target.value)}
+                                    value={price}
+                                    onChange={ (e)=> setPrice(e.target.value)}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="0 - 999"
+                                    placeholder="$299"
+                                  />
+                                </div>
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Canal de venta
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={saleschannel}
+                                    onChange={ (e)=> setSalesChannel(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="Mercadolibre"
+                                  />
+                                </div>
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Método de Pago
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={methodpay}
+                                    onChange={ (e)=> setMethodPay(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="Efectivo"
                                   />
                                 </div>
                               </div>
                           </div>
                         </div>
                         <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                           <div>
+                           
+                          <div>
                             <label
                               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                              Precio
+                              Fecha
                             </label>
                             <input
-                              type="number"
-                              value={price}
-                              onChange={ (e)=> setPrice(e.target.value)}
+                              type="date"
+                              value={date}
+                              onChange={ (e)=> setDate(e.target.value)}
                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                               placeholder="$299"
                             />
@@ -178,7 +243,7 @@ const CreateSale = () => {
                             className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
                             onClick={store}
                           >
-                            Agregar Producto
+                            Agregar Venta
                           </button>
                           <button
                             type="button"

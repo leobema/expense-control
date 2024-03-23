@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import AddProduct from "../components/AddProduct";
 import UpdateProduct from "../components/UpdateProduct"; 
 import AuthContext from "../AuthContext"; 
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import axios from 'axios'
 
 const endpoint = 'http://localhost:8000/api'
@@ -79,7 +79,7 @@ const handleSearchTerm = (e) => {
   const totalStockUp = products.reduce((accumulator, stockup) => accumulator + stockup.stock, 0);
 
   // Calcula la suma total del precios de todos los productos
-  const totalPriceUp = products.reduce((accumulator, priceup) => accumulator + priceup.price, 0);
+  //const totalPriceUp = products.reduce((accumulator, priceup) => accumulator + priceup.price, 0);
 
    // Filtra los productos que tienen un stock entre 1 y 3
   const productsLowStock = products.filter(product => product.stock >= 1 && product.stock <= 3);
