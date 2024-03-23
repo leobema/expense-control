@@ -1,8 +1,7 @@
 import React, { Fragment, useRef, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-//import AuthContext from "../AuthContext";
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const endpoint = 'http://localhost:8000/api/product/'
@@ -14,18 +13,20 @@ const UpdateProduct = ({productId}) => {
   const [stock, setStock] = useState(0)
   const [price, setPrice] = useState(0)
   const [description, setDescription] = useState('')
-  const navigate = useNavigate()
-  const {id} = useParams()
+  const navigate = useNavigate() 
 
   const update = async (e) => {
     e.preventDefault()
-    await axios.put(`${endpoint}${id}`, {
+    await axios.put(`${endpoint}${productId}`, {
       product: product, 
       design: design, 
       stock: stock,
       price: price,
       description: description,
     })
+    // Cerrar el modal y recargar la página
+    setOpen(false);
+    window.location.reload();
     navigate('/inventory')
   }
 
@@ -188,7 +189,7 @@ const UpdateProduct = ({productId}) => {
                             className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
                             onClick={update}
                           >
-                            Editar Producto
+                            Actualizar
                           </button>
                           <button
                             type="button"

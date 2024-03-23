@@ -10,11 +10,12 @@ const endpoint = 'http://localhost:8000/api'
 function Inventory() {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [ products, setProducts ] = useState ([]);
+  const [updateProduct, setUpdateProduct] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [updateProduct, setUpdateProduct] = useState([]);
-  const [searchTerm, setSearchTerm] = useState();
   const [ filteredProducts, setFilteredProducts ] = useState([]);
+  const [searchTerm, setSearchTerm] = useState();
+ 
 
 
   const authContext = useContext(AuthContext);

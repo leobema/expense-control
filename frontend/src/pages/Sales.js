@@ -7,21 +7,19 @@ import axios from 'axios'
 const endpoint = 'http://localhost:8000/api'
 
 function Sales() {
-  const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const [selectedSaleId, setSelectedSaleId] = useState(null); 
   const [ sales, setSales ] = useState ([]);
-  const [ products, setProducts ] = useState ([]);
-  const [ filteredProducts, setFilteredProducts ] = useState([]);
   const [updateSale, setUpdateSale] = useState([]);
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [ filteredSales, setFilteredSales ] = useState([]);
   const [searchTerm, setSearchTerm] = useState();
+  //const [showAddModal, setShowAddModal] = useState(false); 
   //const [showSaleModal, setShowSaleModal] = useState(false);
   // const [updatePage, setUpdatePage] = useState(true);
  
     useEffect ( () => {
       getAllSales()
-      getAllProducts()
     }, [])  
 
     const getAllSales = async () => {
@@ -34,15 +32,7 @@ function Sales() {
       }
     };
 
-    const getAllProducts = async () => {
-      try {
-        const response = await axios.get(`${endpoint}/products`);
-        setProducts(response.data);
-        setFilteredProducts(response.data); // Initialize filtered products with all products
-      } catch (error) {
-        console.error("Error fetching sales:", error);
-      }
-    };
+
   
     const deleteSale = async (id) => {
       try {
@@ -50,16 +40,10 @@ function Sales() {
         setSales(sales.filter(sale => sale.id !== id));
         setFilteredSales(filteredSales.filter(sale => sale.id !== id));
       } catch (error) {
-        console.error("Error deleting product:", error);
+        console.error("Error deleting sale:", error);
       }
     };
 
-
- // const authContext = useContext(AuthContext);
-
-    const handlePageUpdate = () => {
-      getAllSales();
-    };
 
     // Modal for Sale ADD
     const addSaleModalSetting = () => {
@@ -67,10 +51,16 @@ function Sales() {
     };
   
     // Modal for Product UPDATE
-    const updateProductModalSetting = (productId) => {
-      setSelectedSaleId(productId);
+    const updateProductModalSetting = (saleId) => {
+      setSelectedSaleId(saleId);
       // Lógica para mostrar el modal aquí
     };
+
+/*     // Función para cerrar el modal de actualización
+const closeUpdateModal = () => {
+  setShowUpdateModal(false);
+  setSelectedSaleId(null); // Restablecer el estado de selectedSaleId a null
+}; */
 
    // Handle Search Term
 const handleSearchTerm = (e) => {
@@ -197,16 +187,16 @@ const handleSearchTerm = (e) => {
 
         {showSalesModal && (
           <AddSale
-            addSaleModalSetting={addSaleModalSetting}
-            handlePageUpdate={handlePageUpdate}
+          addSaleModalSetting={addSaleModalSetting}
+          handlePageUpdate={getAllSales}
           />
         )}
         {showUpdateModal && (
            <UpdateSale
-            saleId={selectedSaleId}
-            updateProductData={updateSale}
-            updateModalSetting={updateProductModalSetting}
-            handlePageUpdate={handlePageUpdate}
+           saleId={selectedSaleId}
+           updateProductData={updateSale}
+           updateModalSetting={updateProductModalSetting}
+           handlePageUpdate={getAllSales}
           /> 
           )}
        
@@ -301,10 +291,10 @@ const handleSearchTerm = (e) => {
                     {sale.stock}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {sale.price}
+                    ${sale.price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    ${sale.price * sale.stock}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {sale.date}
@@ -318,7 +308,7 @@ const handleSearchTerm = (e) => {
                         onClick={() => {
                           setSelectedSaleId(sale.id);
                           setShowUpdateModal(true);
-                          setUpdateSale(sale); 
+                          setUpdateSale();
                         }}
                       >
                         Editar{" "}

@@ -21,6 +21,7 @@ const CreateSale = () => {
   const [description, setDescription] = useState('')
   const [selectedDesignStock, setSelectedDesignStock] = useState(0);
   const navigate = useNavigate()
+  
 
   useEffect(() => {
     // Función para obtener la lista de productos disponibles al cargar la página
@@ -39,22 +40,25 @@ const CreateSale = () => {
   console.log(products); // Agregar este console.log para verificar los datos
 
   const store = async (e) => {
-    e.preventDefault()
-    await axios.post(`${endpoint}/sale`, {
-      product: product, 
-      design: design, 
-      client: client,
-      stock: stock,
-      saleschannel: saleschannel,
-      methodpay: methodpay,
-      price: price,
-      date: date,
-      description: description,
-    })
-    setOpen(false);
-    window.location.reload(); // Recargar la página
-    navigate('/sales')
-  }
+    e.preventDefault();
+     await axios.post(`${endpoint}/sale`, {
+          product: product, 
+          design: design, 
+          client: client,
+          stock: stock,
+          saleschannel: saleschannel,
+          methodpay: methodpay,
+          price: price,
+          date: date,
+          description: description,
+    });
+ 
+     // Cerrar el modal y recargar la página
+     setOpen(false);
+     window.location.reload();
+     navigate('/sales');
+    };
+
 
   const cancelButtonRef = useRef(null);
 
@@ -161,7 +165,7 @@ const handleDesignChange = (e) => {
                         </div>
                         <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
                           <div className="col-span-2">
-                              <div className="grid gap-4 my-2 grid-cols-2">
+                              <div className="grid gap-4 my-2 grid-cols-1">
                                   <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -181,7 +185,7 @@ const handleDesignChange = (e) => {
                                       ))}
                                     </select>
                                   </div>
-
+                                  <div className="grid gap-4 my-2 grid-cols-2">
                                   <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -202,6 +206,19 @@ const handleDesignChange = (e) => {
                                     />
                                   </div>
                                   <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Precio
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                  />
+                                  </div>
+                                  <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                     >
@@ -215,19 +232,7 @@ const handleDesignChange = (e) => {
                                       placeholder="Nombre cliente"
                                     />
                                   </div>
-                                <div>
-                                  <label
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                  >
-                                    Precio
-                                  </label>
-                                  <input
-                                    type="number"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                  />
-                                </div>
+                               
                                 <div>
                                   <label
                                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -256,25 +261,27 @@ const handleDesignChange = (e) => {
                                     placeholder="ej. Efectivo"
                                   />
                                 </div>
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Fecha
+                                  </label>
+                                  <input
+                                    type="date"
+                                    value={date}
+                                    onChange={ (e)=> setDate(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="$299"
+                                  />
+                                </div>
+                              </div>
                               </div>
                           </div>
                         </div>
                         <div className="grid gap-4 mb-4 sm:grid-cols-2">
                            
-                          <div>
-                            <label
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Fecha
-                            </label>
-                            <input
-                              type="date"
-                              value={date}
-                              onChange={ (e)=> setDate(e.target.value)}
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="$299"
-                            />
-                          </div>
+                         
                           <div className="sm:col-span-2">
                             <label
                               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"

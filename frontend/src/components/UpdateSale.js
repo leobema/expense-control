@@ -1,48 +1,118 @@
-import { Fragment, useRef, useState } from "react";
+import React, { Fragment, useRef, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-//import Sales from "../pages/Sales";
- 
-export default function UpdateProduct({
-  updateSalesData,
-  updateModalSetting, 
-  products,
-  stores,
-}) {
-  const { _id, name, design, description, store, stockSold } = updateSalesData;
+//import AuthContext from "../AuthContext";
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
-  const [sales, setSales] = useState({
-    productID: _id,
-    name: name,
-    storeID: store,
-    design: design,
-    description: description,
-    stockSold: stockSold,
+const endpoint = 'http://localhost:8000/api/sale/'
+const endpoint2 = 'http://localhost:8000/api'
 
-  });
+const UpdateSale = ({saleId}) => {
+
+  const [products, setProducts] = useState([]); // Estado para almacenar los productos disponibles
+  const [product, setProduct] = useState('')
+  const [design, setDesign] = useState('')
+  const [client, setClient] = useState('')
+  const [stock, setStock] = useState(0)
+  const [price, setPrice] = useState(0)
+  const [description, setDescription] = useState('')
+  const [date, setDate] = useState('')
+  const [saleschannel, setSalesChannel] = useState('')
+  const [methodpay, setMethodPay] = useState('')
+  const [selectedDesignStock, setSelectedDesignStock] = useState(0);
+  const navigate = useNavigate()
+
+  const update = async (e) => {
+    e.preventDefault()
+    await axios.put(`${endpoint}${saleId}`, {
+      product: product, 
+      design: design, 
+      client: client,
+      stock: stock,
+      price: price,
+      saleschannel: saleschannel,
+      methodpay: methodpay,
+      date: date,
+      description: description,
+    })
+    // Cerrar el modal y recargar la página
+    setOpen(false);
+    window.location.reload();
+    navigate('/sales')
+  }
+
+  useEffect( () =>{
+
+    const getSaleById = async () => {
+      try {
+        const response = await axios.get(`${endpoint}${saleId}`);
+        const { product, design, client, stock, date, price, saleschannel, methodpay, description } = response.data;
+        setProduct(product);
+        setDesign(design);
+        setClient(client);
+        setStock(stock);
+        setPrice(price);
+        setDate(date);
+        setSalesChannel(saleschannel);
+        setMethodPay(methodpay);
+        setDescription(description);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    };
+
+    if (saleId) {
+      getSaleById();
+    }
+
+
+    // Función para obtener la lista de productos disponibles al cargar la página
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${endpoint2}/products`);
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+
+   
+  }, [saleId]);
 
   const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
 
-  const handleInputChange = (key, value) => {
-    console.log(key);
-    setSales({ ...sales, [key]: value });
-  };
+      // Obtener un conjunto de nombres únicos de productos
+const uniqueProductNames = new Set(products.map(product => product.product));
 
-  const updateSale = () => {
-    fetch("http://localhost:4000/api/sale/update", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(sales),
-    })
-      .then((result) => {
-        alert("Sale Updated");
-        setOpen(false);
-      })
-      .catch((err) => console.log(err));
-  };
+// Convertir el conjunto en una matriz para poder mapear
+const uniqueProductNamesArray = Array.from(uniqueProductNames);
+
+// Obtener una lista de todos los diseños asociados al producto seleccionado
+const selectedProductDesigns = products
+  .filter(prod => prod.product === product) // Filtrar productos que coincidan con el seleccionado
+  .map(prod => ({
+    design: prod.design,
+    stock: prod.stock,
+    price: prod.price,
+  })); // Obtener una lista de todos los diseños
+
+  // Función para manejar el cambio de diseño seleccionado
+const handleDesignChange = (e) => {
+  const selectedDesign = e.target.value;
+  const designInfo = selectedProductDesigns.find(design => design.design === selectedDesign);
+  if (designInfo) {
+    setDesign(selectedDesign);
+    setStock(designInfo.stock);
+    setPrice(designInfo.price);
+    setSelectedDesignStock(designInfo.stock); // Definir selectedDesignStock
+  }
+}
+
+
 
   return (
     // Modal
@@ -90,142 +160,164 @@ export default function UpdateProduct({
                         as="h3"
                         className="text-lg font-semibold leading-6 text-gray-900 "
                       >
-                        Editar Producto
+                        Editar Venta
                       </Dialog.Title>
-                      <form action="#">
+                      <form onSubmit={update}>
+                        <div className="grid grid-flow-row gap-4 mb-4 mt-4 sm:grid-cols-2">
+                          <div className="col-span-2">
+                            <label
+                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                              Producto
+                            </label>
+                            <select
+                              value={product}
+                              onChange={(e) => setProduct(e.target.value)}
+                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            >
+                              <option value="" disabled>
+                                Seleccione un producto
+                              </option>
+                              {uniqueProductNamesArray.map(productName => (
+                                <option key={productName} value={productName}>
+                                  {productName}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
+                          <div className="col-span-2">
+                              <div className="grid gap-4 my-2 grid-cols-1">
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Diseño 
+                                    </label>
+                                    <select
+                                      value={design}
+                                      onChange={handleDesignChange}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    >
+                                      <option value="">Seleccionar Diseño</option>
+                                      {selectedProductDesigns.map(design => (
+                                        <option key={design.design} value={design.design}>
+                                          {design.design}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="grid gap-4 my-2 grid-cols-2">
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Stock 
+                                    </label>
+                                    <input
+                                      type="number"
+                                      value={stock}
+                                      onChange={(e) => {
+                                        const inputValue = parseInt(e.target.value);
+                                        // Verificar que el valor ingresado no sea mayor al stock existente ni igual a 0
+                                        if (!isNaN(inputValue) && inputValue > 0 && inputValue <= selectedDesignStock) {
+                                          setStock(inputValue);
+                                        }
+                                      }}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    />
+                                  </div>
+                                  <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Precio
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                  />
+                                  </div>
+                                  <div>
+                                    <label
+                                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    >
+                                      Cliente 
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client}
+                                      onChange={ (e)=> setClient(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      placeholder="Nombre cliente"
+                                    />
+                                  </div>
+                               
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Canal de venta
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={saleschannel}
+                                    onChange={ (e)=> setSalesChannel(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="ej. Mercadolibre"
+                                  />
+                                </div>
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Método de Pago
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={methodpay}
+                                    onChange={ (e)=> setMethodPay(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="ej. Efectivo"
+                                  />
+                                </div>
+                                <div>
+                                  <label
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                  >
+                                    Fecha
+                                  </label>
+                                  <input
+                                    type="date"
+                                    value={date}
+                                    onChange={ (e)=> setDate(e.target.value)}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="$299"
+                                  />
+                                </div>
+                              </div>
+                              </div>
+                          </div>
+                        </div>
                         <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                        <div>
-                            <label
-                              htmlFor="productID"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Nombre de Producto
-                            </label>
-                            <select
-                              id="productID"
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              name="productID"
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
-                              defaultValue={sales.productID}
-                            >
-                              <option value="">Select Products</option>
-                              {products.map((product, index) => {
-                                return (
-                                  <option key={product._id} value={product._id}>
-                                    {product.name}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="design"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Diseño
-                            </label>
-                            <select
-                              id="design"
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              name="design"
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
-                              defaultValue={sales.design}
-                            >
-                              <option value="">Select Diseño</option>
-                              {products.map((product, index) => {
-                                return (
-                                  <option key={product._id} value={product._id}>
-                                    {product.design}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="stock"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Stock
-                            </label>
-                            <input
-                              type="number"
-                              name="stock"
-                              id="stock"
-                              value={sales.stock}
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="0 - 999"
-                            />
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="totalPurchaseAmount"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Costo/Und
-                            </label>
-                            <input
-                              type="number"
-                              name="totalPurchaseAmount"
-                              id="totalPurchaseAmount"
-                              value={products.price}
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="$299"
-                            />
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="storeID"
-                              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Store Name
-                            </label>
-                            <select
-                              id="storeID"
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              name="storeID"
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
-                            >
-                              <option selected="">Select Store</option>
-                              {stores.map((element, index) => {
-                                return (
-                                  <option key={element._id} value={element._id}>
-                                    {element.name}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
+                           
+                         
                           <div className="sm:col-span-2">
                             <label
-                              htmlFor="description"
                               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                              Descripcion
+                              Observación
                             </label>
                             <textarea
-                              id="description"
                               rows="5"
-                              name="description"
                               className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="Write a description..."
-                              value={products.description}
-                              onChange={(e) =>
-                                handleInputChange(e.target.name, e.target.value)
-                              }
+                              placeholder="Descripción breve del producto..."
+                              value={description}
+                              onChange={ (e)=> setDescription(e.target.value)}
+                              maxLength={60}
                             >
                               Standard glass, 3.8GHz 8-core 10th-generation
                               Intel Core i7 processor, Turbo Boost up to 5.0GHz,
@@ -235,53 +327,27 @@ export default function UpdateProduct({
                             </textarea>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          {/* <button
-                            type="submit"
-                            className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                          >
-                            Update product
-                          </button> */}
-                          {/* <button
+                        <div className=" px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                          <button
                             type="button"
-                            className="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+                            className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+                            onClick={update}
                           >
-                            <svg
-                              className="mr-1 -ml-1 w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                clip-rule="evenodd"
-                              ></path>
-                            </svg>
-                            Delete
-                          </button> */}
+                            Actualizar
+                          </button>
+                          <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                            onClick={() => setOpen(false)}
+                          >
+                            Cancelar
+                          </button>
                         </div>
                       </form>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button
-                    type="button"
-                    className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
-                    onClick={updateSale}
-                  >
-                    Actualizar Producto
-                  </button>
-                  <button
-                    type="button"
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                    onClick={() => updateModalSetting()}
-                    ref={cancelButtonRef}
-                  >
-                    Cancelar
-                  </button>
-                </div>
+                
               </Dialog.Panel>
             </Transition.Child>
           </div>
@@ -290,3 +356,5 @@ export default function UpdateProduct({
     </Transition.Root>
   );
 }
+
+export default UpdateSale
