@@ -1,14 +1,15 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useRef, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 //import AuthContext from "../AuthContext";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const endpoint = 'http://localhost:8000/api/sale/'
+const endpoint = 'http://localhost:8000/api'
 
 const CreateSale = () => {
-  
+  const [products, setProducts] = useState([]); // Estado para almacenar los productos disponibles
+  const [open, setOpen] = useState(true);
   const [product, setProduct] = useState('')
   const [design, setDesign] = useState('')
   const [client, setClient] = useState('')
@@ -18,11 +19,28 @@ const CreateSale = () => {
   const [saleschannel, setSalesChannel] = useState('')
   const [methodpay, setMethodPay] = useState('')
   const [description, setDescription] = useState('')
+  const [selectedDesignStock, setSelectedDesignStock] = useState(0);
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // Función para obtener la lista de productos disponibles al cargar la página
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${endpoint}/products`);
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  console.log(products); // Agregar este console.log para verificar los datos
 
   const store = async (e) => {
     e.preventDefault()
-    await axios.post(endpoint, {
+    await axios.post(`${endpoint}/sale`, {
       product: product, 
       design: design, 
       client: client,
@@ -38,9 +56,35 @@ const CreateSale = () => {
     navigate('/sales')
   }
 
-
-  const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
+
+
+  // Obtener un conjunto de nombres únicos de productos
+const uniqueProductNames = new Set(products.map(product => product.product));
+
+// Convertir el conjunto en una matriz para poder mapear
+const uniqueProductNamesArray = Array.from(uniqueProductNames);
+
+// Obtener una lista de todos los diseños asociados al producto seleccionado
+const selectedProductDesigns = products
+  .filter(prod => prod.product === product) // Filtrar productos que coincidan con el seleccionado
+  .map(prod => ({
+    design: prod.design,
+    stock: prod.stock,
+    price: prod.price,
+  })); // Obtener una lista de todos los diseños
+
+  // Función para manejar el cambio de diseño seleccionado
+const handleDesignChange = (e) => {
+  const selectedDesign = e.target.value;
+  const designInfo = selectedProductDesigns.find(design => design.design === selectedDesign);
+  if (designInfo) {
+    setDesign(selectedDesign);
+    setStock(designInfo.stock);
+    setPrice(designInfo.price);
+    setSelectedDesignStock(designInfo.stock); // Definir selectedDesignStock
+  }
+}
 
 
   return (
@@ -89,7 +133,7 @@ const CreateSale = () => {
                         as="h3"
                         className="text-lg font-semibold leading-6 text-gray-900 "
                       >
-                        Agregar Producto
+                        Agregar Venta
                       </Dialog.Title>
                       <form onSubmit={store}>
                         <div className="grid grid-flow-row gap-4 mb-4 mt-4 sm:grid-cols-2">
@@ -99,13 +143,20 @@ const CreateSale = () => {
                             >
                               Producto
                             </label>
-                            <input
-                              type="text"
+                            <select
                               value={product}
-                              onChange={ (e)=> setProduct(e.target.value)}
+                              onChange={(e) => setProduct(e.target.value)}
                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="Ej. Remera"
-                            />
+                            >
+                              <option value="" disabled>
+                                Seleccione un producto
+                              </option>
+                              {uniqueProductNamesArray.map(productName => (
+                                <option key={productName} value={productName}>
+                                  {productName}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         </div>
                         <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
@@ -117,13 +168,18 @@ const CreateSale = () => {
                                     >
                                       Diseño 
                                     </label>
-                                    <input
-                                      type="text"
+                                    <select
                                       value={design}
-                                      onChange={ (e)=> setDesign(e.target.value)}
+                                      onChange={handleDesignChange}
                                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                      placeholder="Ej. Sonic"
-                                    />
+                                    >
+                                      <option value="">Seleccionar Diseño</option>
+                                      {selectedProductDesigns.map(design => (
+                                        <option key={design.design} value={design.design}>
+                                          {design.design}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </div>
 
                                   <div>
@@ -135,9 +191,14 @@ const CreateSale = () => {
                                     <input
                                       type="number"
                                       value={stock}
-                                      onChange={ (e)=> setStock(e.target.value)}
+                                      onChange={(e) => {
+                                        const inputValue = parseInt(e.target.value);
+                                        // Verificar que el valor ingresado no sea mayor al stock existente ni igual a 0
+                                        if (!isNaN(inputValue) && inputValue > 0 && inputValue <= selectedDesignStock) {
+                                          setStock(inputValue);
+                                        }
+                                      }}
                                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                      placeholder="0 - 999"
                                     />
                                   </div>
                                   <div>
@@ -163,9 +224,8 @@ const CreateSale = () => {
                                   <input
                                     type="number"
                                     value={price}
-                                    onChange={ (e)=> setPrice(e.target.value)}
+                                    onChange={(e) => setPrice(e.target.value)}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="$299"
                                   />
                                 </div>
                                 <div>
@@ -179,7 +239,7 @@ const CreateSale = () => {
                                     value={saleschannel}
                                     onChange={ (e)=> setSalesChannel(e.target.value)}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="Mercadolibre"
+                                    placeholder="ej. Mercadolibre"
                                   />
                                 </div>
                                 <div>
@@ -193,7 +253,7 @@ const CreateSale = () => {
                                     value={methodpay}
                                     onChange={ (e)=> setMethodPay(e.target.value)}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="Efectivo"
+                                    placeholder="ej. Efectivo"
                                   />
                                 </div>
                               </div>

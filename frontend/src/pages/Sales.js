@@ -9,23 +9,36 @@ const endpoint = 'http://localhost:8000/api'
 function Sales() {
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [ sales, setSales ] = useState ([]);
+  const [ products, setProducts ] = useState ([]);
+  const [ filteredProducts, setFilteredProducts ] = useState([]);
   const [updateSale, setUpdateSale] = useState([]);
-  //const [showSaleModal, setShowSaleModal] = useState(false);
   const [showSalesModal, setShowSalesModal] = useState(false);
- // const [updatePage, setUpdatePage] = useState(true);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [ filteredSales, setFilteredSales ] = useState([]);
   const [searchTerm, setSearchTerm] = useState();
+  //const [showSaleModal, setShowSaleModal] = useState(false);
+  // const [updatePage, setUpdatePage] = useState(true);
  
     useEffect ( () => {
       getAllSales()
+      getAllProducts()
     }, [])  
 
     const getAllSales = async () => {
       try {
         const response = await axios.get(`${endpoint}/sales`);
         setSales(response.data);
-        setFilteredSales(response.data); // Initialize filtered products with all products
+        setFilteredSales(response.data); // Initialize filtered products with all sales
+      } catch (error) {
+        console.error("Error fetching sales:", error);
+      }
+    };
+
+    const getAllProducts = async () => {
+      try {
+        const response = await axios.get(`${endpoint}/products`);
+        setProducts(response.data);
+        setFilteredProducts(response.data); // Initialize filtered products with all products
       } catch (error) {
         console.error("Error fetching sales:", error);
       }
