@@ -9,8 +9,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(ProductController::class)->group(function (){
-    Route::get('/products', 'index');
+    //Route::get('/products', 'index');
+    Route::get('/products', [ProductController::class, 'index']);
     Route::post('/product', 'store');
+    Route::post('/product/{id}/design', 'storeDesgin');
     Route::get('/product/{id}', 'show');
     Route::put('/product/{id}', 'update');
     Route::delete('/product/{id}', 'destroy');

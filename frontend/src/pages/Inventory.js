@@ -128,7 +128,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                    {totalStockUp} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
-                    Suma de stock
+                    Stock
                   </span>
                 </div>
                 <div className="flex flex-col">
@@ -136,7 +136,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                      ${totalValue} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
-                    Valor Total
+                    Valor
                   </span>
                 </div>
               </div>
@@ -273,7 +273,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                      {product.product}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.design}
+                    {product.designs.length > 0 ? product.designs[0].design : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {product.stock}

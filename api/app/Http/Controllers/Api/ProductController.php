@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Design;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,7 +14,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
+        /* $products = Product::all();
+        return $products; */
+
+        $products = Product::with('designs')->get();
         return $products;
     }
 
@@ -21,12 +25,20 @@ class ProductController extends Controller
     {
          $product = new Product();
          $product->product = $request->product;
-         $product->design = $request->design;
          $product->price = $request->price;
          $product->stock = $request->stock;
          $product->description = $request->description;
          
          $product->save();
+
+        // Verifica si se proporciona un diseño en la solicitud
+        if ($request->has('design')) {
+        $design = new Design();
+        $design->design = $request->design;
+        $product->designs()->save($design);
+    }
+     
+         return $product;
     }
 
     public function show(string $id)
@@ -39,13 +51,24 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($request->id);
         $product->product = $request->product;
-        $product->design = $request->design;
         $product->price = $request->price;
         $product->stock = $request->stock;
         $product->description = $request->description;
 
         $product->save();
-        return $product;
+
+        // Verificar si se proporciona un diseño en la solicitud
+        if ($request->has('design')) {
+            $design = $product->designs->first();
+            if (!$design) {
+                $design = new Design();
+                $design->product_id = $product->id; // Asignar el ID del producto al diseño
+            }
+            $design->design = $request->design;
+            $design->save();
+    }
+
+    return $product;
     }
 
     /**

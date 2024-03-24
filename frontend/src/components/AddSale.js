@@ -8,9 +8,12 @@ import axios from 'axios'
 const endpoint = 'http://localhost:8000/api'
 
 const CreateSale = () => {
-  const [products, setProducts] = useState([]); // Estado para almacenar los productos disponibles
+  const [products, setProducts] = useState([]); 
   const [open, setOpen] = useState(true);
   const [product, setProduct] = useState('')
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  //const [selectedDesignId, setSelectedDesignId] = useState(null);
+  //const [productId, setProductId] = useState(''); // Estado para almacenar el ID del producto seleccionado
   const [design, setDesign] = useState('')
   const [client, setClient] = useState('')
   const [stock, setStock] = useState(0)
@@ -21,6 +24,8 @@ const CreateSale = () => {
   const [description, setDescription] = useState('')
   const [selectedDesignStock, setSelectedDesignStock] = useState(0);
   const navigate = useNavigate()
+
+  console.log('lee valor selectedProductId', selectedProductId)
   
 
   useEffect(() => {
@@ -37,28 +42,47 @@ const CreateSale = () => {
     fetchProducts();
   }, []);
 
-  console.log(products); // Agregar este console.log para verificar los datos
-
   const store = async (e) => {
     e.preventDefault();
-     await axios.post(`${endpoint}/sale`, {
-          product: product, 
-          design: design, 
-          client: client,
-          stock: stock,
-          saleschannel: saleschannel,
-          methodpay: methodpay,
-          price: price,
-          date: date,
-          description: description,
-    });
- 
-     // Cerrar el modal y recargar la página
-     setOpen(false);
-     window.location.reload();
-     navigate('/sales');
-    };
+    await axios.post(`${endpoint}/sale`, {
+        product: product,
+        design: design,
+        client: client,
+        stock: stock,
+        saleschannel: saleschannel,
+        methodpay: methodpay,
+        price: price,
+        date: date,
+        description: description,
+      });
 
+      // Cerrar el modal
+      setOpen(false);
+      window.location.reload();
+      navigate('/sales');
+    
+  };
+
+  const handleProductChange = (e) => {
+    const selectedProductName = e.target.value;
+    setProduct(selectedProductName);
+    const selectedProduct = products.find(product => product.product === selectedProductName);
+    if (selectedProduct) {
+      const defaultDesign = selectedProduct.designs ? selectedProduct.designs[0] : null;
+      if (defaultDesign) {
+        setDesign(defaultDesign.design);
+        setStock(defaultDesign.stock);
+        setPrice(defaultDesign.price);
+        setSelectedDesignStock(defaultDesign.stock);
+      } else {
+        setDesign('');
+        setStock(0);
+        setPrice(0);
+        setSelectedDesignStock(0);
+      }
+      setSelectedProductId(selectedProduct.id);
+    }
+  };
 
   const cancelButtonRef = useRef(null);
 
@@ -149,7 +173,7 @@ const handleDesignChange = (e) => {
                             </label>
                             <select
                               value={product}
-                              onChange={(e) => setProduct(e.target.value)}
+                              onChange={handleProductChange}
                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                             >
                               <option value="" disabled>

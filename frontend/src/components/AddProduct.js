@@ -8,31 +8,38 @@ import axios from 'axios'
 const endpoint = 'http://localhost:8000/api/product/'
 
 const CreateProduct = () => {
-  
   const [product, setProduct] = useState('')
   const [design, setDesign] = useState('')
   const [stock, setStock] = useState(0)
   const [price, setPrice] = useState(0)
   const [description, setDescription] = useState('')
   const navigate = useNavigate()
+  const [open, setOpen] = useState(true);
+  const cancelButtonRef = useRef(null);
 
   const store = async (e) => {
     e.preventDefault()
-    await axios.post(endpoint, {
-      product: product, 
+    const productData = {
+      product: product,
       design: design, 
-      stock: stock,
       price: price,
+      stock: stock,
       description: description,
-    })
-    setOpen(false);
-    window.location.reload(); // Recargar la página
-    navigate('/inventory')
-  }
+
+    };
+  
+    try {
+      await axios.post(endpoint, productData);
+      setOpen(false);
+      window.location.reload(); // Recargar la página
+      navigate('/inventory');
+    } catch (error) {
+      console.error('Error creating product:', error);
+    }
+  };
 
 
-  const [open, setOpen] = useState(true);
-  const cancelButtonRef = useRef(null);
+ 
 
 
   return (

@@ -25,6 +25,31 @@ function SideMenu() {
                 <div className="flex items-center gap-2">
                   <img
                     alt="inventory-icon-mp"
+                    src={require("../assets/db-icon.png")}
+                  />
+                  <span className="text-sm font-medium"> DB costo de items </span>
+                </div>
+              </Link>
+            </summary>
+          </details>
+
+          <Link
+            to="/purchase-details"
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          >
+            <img
+              alt="purchase-icon"
+              src={require("../assets/purchase-icon.png")}
+            />
+            <span className="text-sm font-medium"> Compras</span>
+          </Link>
+
+          <details className="group [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+              <Link to="/#">
+                <div className="flex items-center gap-2">
+                  <img
+                    alt="inventory-icon-mp"
                     src={require("../assets/inventory-icon-mp.png")}
                   />
                   <span className="text-sm font-medium"> Inventario MP </span>
@@ -33,19 +58,7 @@ function SideMenu() {
             </summary>
           </details>
 
-          <details className="group [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-              <Link to="/#">
-                <div className="flex items-center gap-2">
-                  <img
-                    alt="inventory-icon-mp"
-                    src={require("../assets/db-icon.png")}
-                  />
-                  <span className="text-sm font-medium"> DB costo de items </span>
-                </div>
-              </Link>
-            </summary>
-          </details>
+          
 
           <details className="group [&_summary::-webkit-details-marker]:hidden">
             <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
@@ -89,16 +102,7 @@ function SideMenu() {
             </summary>
           </details>
 
-          <Link
-            to="/purchase-details"
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          >
-            <img
-              alt="purchase-icon"
-              src={require("../assets/purchase-icon.png")}
-            />
-            <span className="text-sm font-medium"> Compras</span>
-          </Link>
+          
           <Link
             to="/sales"
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
