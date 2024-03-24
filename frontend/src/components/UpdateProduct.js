@@ -4,7 +4,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const endpoint = 'http://localhost:8000/api/product/'
+const endpoint = 'http://localhost:8000/api/products/'
 
 const UpdateProduct = ({productId}) => {
   
@@ -34,17 +34,24 @@ const UpdateProduct = ({productId}) => {
     const getProductById = async () => {
       try {
         const response = await axios.get(`${endpoint}${productId}`);
-        const { product, design, stock, price, description } = response.data;
-        setProduct(product);
-        setDesign(design);
-        setStock(stock);
-        setPrice(price);
-        setDescription(description);
+        const { designs, ...product } = response.data; // Extrae los diseños y el resto de los datos del producto
+        
+        setProduct(product.product);
+        
+        if (designs.length > 0) { // Verifica si hay diseños asociados al producto
+          const design = designs[0]; // Suponiendo que solo hay un diseño por producto
+          setDesign(design.design);
+          setStock(design.stock);
+          setPrice(design.price);
+          setDescription(design.description);
+        } else {
+          // Maneja el caso en el que no hay diseños asociados al producto
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
       }
     };
-
+  
     if (productId) {
       getProductById();
     }

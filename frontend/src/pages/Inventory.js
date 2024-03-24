@@ -27,6 +27,7 @@ function Inventory() {
     getAllProducts()
   }, [])  
 
+
   const getAllProducts = async () => {
     try {
       const response = await axios.get(`${endpoint}/products`);
@@ -39,7 +40,7 @@ function Inventory() {
  
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`${endpoint}/product/${id}`);
+      await axios.delete(`${endpoint}/products/${id}`);
       setProducts(products.filter(product => product.id !== id));
       setFilteredProducts(filteredProducts.filter(product => product.id !== id));
     } catch (error) {
@@ -76,30 +77,6 @@ const handleSearchTerm = (e) => {
   setFilteredProducts(filteredProducts);
 };
 
-   // Calcula la suma total del stock de todos los productos
-  const totalStockUp = products.reduce((accumulator, stockup) => accumulator + stockup.stock, 0);
-
-  // Calcula la suma total del precios de todos los productos
-  //const totalPriceUp = products.reduce((accumulator, priceup) => accumulator + priceup.price, 0);
-
-   // Filtra los productos que tienen un stock entre 1 y 3
-  const productsLowStock = products.filter(product => product.stock >= 1 && product.stock <= 3);
-
-  // Cuenta el número de productos que cumplen con la condición anterior
-  const countProductsLowStock = productsLowStock.length;
-
-  // Filtra los productos que tienen un stock entre 1 y 3
-  const productsNoStock = products.filter(product => product.stock === 0);
-
-  // Cuenta el número de productos que cumplen con la condición anterior
-  const countProductsNoStock = productsNoStock.length;  
-
-  // Calcula la suma total del valor de todos los productos
-const totalValue = filteredProducts.reduce((accumulator, product) => {
-  return accumulator + (product.price * product.stock);
-}, 0);
-
-
 
   return (
     <div className="col-span-12 lg:col-span-10  flex justify-center">
@@ -109,13 +86,13 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
           <div className=" flex flex-col md:flex-row justify-center items-center">
             <div className="flex flex-col p-10  w-full  md:w-3/12  ">
               <span className="font-semibold text-blue-600 text-base">
-                Total de Productos
+                Productos
               </span>
               <span className="font-semibold text-gray-600 text-base">
                 {products.length}
               </span>
               <span className="font-thin text-gray-400 text-xs">
-                Suma de todos los productos
+                Todos los productos
               </span>
             </div>
             <div className="flex flex-col gap-3 p-10   w-full  md:w-3/12 sm:border-y-2  md:border-x-2 md:border-y-0">
@@ -125,7 +102,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
               <div className="flex gap-8">
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-600 text-base">
-                   {totalStockUp} 
+                   0{} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Stock
@@ -133,7 +110,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-600 text-base">
-                     ${totalValue} 
+                     $0{} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Valor
@@ -148,7 +125,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
               <div className="flex gap-8">
                 <div className="flex flex-col">
                   <span className="font-semibold text-yellow-600 text-base">
-                   {countProductsLowStock} 
+                   0{} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Stock Bajo
@@ -156,7 +133,7 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-red-600 text-base">
-                   {countProductsNoStock} 
+                   0{} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Sin Stock
