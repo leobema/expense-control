@@ -11,9 +11,7 @@ const CreateSale = () => {
   const [products, setProducts] = useState([]); 
   const [open, setOpen] = useState(true);
   const [product, setProduct] = useState('')
-  const [selectedProductId, setSelectedProductId] = useState(null);
-  //const [selectedDesignId, setSelectedDesignId] = useState(null);
-  //const [productId, setProductId] = useState(''); // Estado para almacenar el ID del producto seleccionado
+  const [availableDesigns, setAvailableDesigns] = useState([]);
   const [design, setDesign] = useState('')
   const [client, setClient] = useState('')
   const [stock, setStock] = useState(0)
@@ -23,28 +21,85 @@ const CreateSale = () => {
   const [methodpay, setMethodPay] = useState('')
   const [description, setDescription] = useState('')
   const [selectedDesignStock, setSelectedDesignStock] = useState(0);
+
   const navigate = useNavigate()
 
-  console.log('lee valor selectedProductId', selectedProductId)
-  
-
   useEffect(() => {
-    // Función para obtener la lista de productos disponibles al cargar la página
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         const response = await axios.get(`${endpoint}/products`);
         setProducts(response.data);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error('Error fetching products:', error);
       }
     };
-
-    fetchProducts();
+    fetchData();
   }, []);
+
+/*   const groupProducts = (data) => {
+    const productsArray = [];
+    data.forEach((item) => {
+      const existingProductIndex = productsArray.findIndex((p) => p.product === item.product);
+      if (existingProductIndex === -1) {
+        // Si el producto aún no está en el array, lo agregamos con su primer diseño
+        productsArray.push({
+          product: item.product,
+          designs: [{ design: item.design, stock: item.stock, price: item.price }]
+        });
+      } else {
+        // Si el producto ya está en el array, agregamos su diseño al array de diseños
+        productsArray[existingProductIndex].designs.push({
+          design: item.design,
+          stock: item.stock,
+          price: item.price
+        });
+      }
+    });
+    return productsArray;
+  };
+ */
+
+  const handleProductChange = (e) => {
+    const selectedProductName = e.target.value;
+    setProduct(selectedProductName);
+    const selectedProducts = products.filter(product => product.product === selectedProductName);
+    if (selectedProducts.length > 0) {
+      const allDesigns = selectedProducts.reduce((accumulator, currentProduct) => {
+        accumulator.push(...currentProduct.designs);
+        return accumulator;
+      }, []);
+      setAvailableDesigns(allDesigns);
+      setDesign('');
+      setStock(0);
+      setPrice(0);
+      setSelectedDesignStock(0);
+    } else {
+      // Si no hay productos seleccionados, resetear las variables relacionadas con el diseño
+      setAvailableDesigns([]);
+      setDesign('');
+      setStock(0);
+      setPrice(0);
+      setSelectedDesignStock(0);
+    }
+  };
+
+  
+
+  const handleDesignChange = (e) => {
+    const selectedDesignId = parseInt(e.target.value);
+    setDesign(selectedDesignId);
+    const selectedDesignInfo = availableDesigns.find(design => design.id === selectedDesignId);
+    if (selectedDesignInfo) {
+      setStock(selectedDesignInfo.stock);
+      setPrice(selectedDesignInfo.price);
+      setSelectedDesignStock(selectedDesignInfo.stock);
+    }
+  };
+  
 
   const store = async (e) => {
     e.preventDefault();
-    await axios.post(`${endpoint}/sale`, {
+    await axios.post(`${endpoint}/sales`, {
         product: product,
         design: design,
         client: client,
@@ -63,37 +118,11 @@ const CreateSale = () => {
     
   };
 
-  const handleProductChange = (e) => {
-    const selectedProductName = e.target.value;
-    setProduct(selectedProductName);
-    const selectedProduct = products.find(product => product.product === selectedProductName);
-    if (selectedProduct) {
-      const defaultDesign = selectedProduct.designs ? selectedProduct.designs[0] : null;
-      if (defaultDesign) {
-        setDesign(defaultDesign.design);
-        setStock(defaultDesign.stock);
-        setPrice(defaultDesign.price);
-        setSelectedDesignStock(defaultDesign.stock);
-      } else {
-        setDesign('');
-        setStock(0);
-        setPrice(0);
-        setSelectedDesignStock(0);
-      }
-      setSelectedProductId(selectedProduct.id);
-    }
-  };
+  console.log(availableDesigns);
 
   const cancelButtonRef = useRef(null);
 
-
-  // Obtener un conjunto de nombres únicos de productos
-const uniqueProductNames = new Set(products.map(product => product.product));
-
-// Convertir el conjunto en una matriz para poder mapear
-const uniqueProductNamesArray = Array.from(uniqueProductNames);
-
-// Obtener una lista de todos los diseños asociados al producto seleccionado
+/* // Obtener una lista de todos los diseños asociados al producto seleccionado
 const selectedProductDesigns = products
   .filter(prod => prod.product === product) // Filtrar productos que coincidan con el seleccionado
   .map(prod => ({
@@ -102,17 +131,9 @@ const selectedProductDesigns = products
     price: prod.price,
   })); // Obtener una lista de todos los diseños
 
-  // Función para manejar el cambio de diseño seleccionado
-const handleDesignChange = (e) => {
-  const selectedDesign = e.target.value;
-  const designInfo = selectedProductDesigns.find(design => design.design === selectedDesign);
-  if (designInfo) {
-    setDesign(selectedDesign);
-    setStock(designInfo.stock);
-    setPrice(designInfo.price);
-    setSelectedDesignStock(designInfo.stock); // Definir selectedDesignStock
-  }
-}
+ */
+// Obtener nombres únicos de los productos
+const uniqueProductNames = Array.from(new Set(products.map(product => product.product)));
 
 
   return (
@@ -179,17 +200,18 @@ const handleDesignChange = (e) => {
                               <option value="" disabled>
                                 Seleccione un producto
                               </option>
-                              {uniqueProductNamesArray.map(productName => (
-                                <option key={productName} value={productName}>
-                                  {productName}
-                                </option>
-                              ))}
+                              {uniqueProductNames.map(productName => (
+                              <option key={productName} value={productName}>
+                                {productName}
+                              </option>
+                            ))}
                             </select>
                           </div>
                         </div>
                         <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
                           <div className="col-span-2">
                               <div className="grid gap-4 my-2 grid-cols-1">
+                              
                                   <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -197,18 +219,19 @@ const handleDesignChange = (e) => {
                                       Diseño 
                                     </label>
                                     <select
-                                      value={design}
-                                      onChange={handleDesignChange}
-                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    >
-                                      <option value="">Seleccionar Diseño</option>
-                                      {selectedProductDesigns.map(design => (
-                                        <option key={design.design} value={design.design}>
-                                          {design.design}
-                                        </option>
-                                      ))}
-                                    </select>
+                                          value={design.id}
+                                          onChange={handleDesignChange}
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                        >
+                                          <option value="">Seleccionar Diseño</option>
+                                          {availableDesigns.map((designItem, index) => (
+                                          <option key={designItem.id} value={designItem.id}> {/* Aquí se cambia de designItem.name a designItem.design */}
+                                            {designItem.design}
+                                          </option>
+                                        ))}
+                                        </select>
                                   </div>
+                                  
                                   <div className="grid gap-4 my-2 grid-cols-2">
                                   <div>
                                     <label
@@ -216,6 +239,7 @@ const handleDesignChange = (e) => {
                                     >
                                       Stock 
                                     </label>
+                                    
                                     <input
                                       type="number"
                                       value={stock}
@@ -242,6 +266,7 @@ const handleDesignChange = (e) => {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                   />
                                   </div>
+                                  
                                   <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
