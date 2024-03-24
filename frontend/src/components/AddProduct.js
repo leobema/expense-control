@@ -5,7 +5,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const endpoint = 'http://localhost:8000/api/product/'
+const endpoint = 'http://localhost:8000/api/products/'
 
 const CreateProduct = () => {
   const [product, setProduct] = useState('')

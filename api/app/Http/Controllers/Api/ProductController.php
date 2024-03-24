@@ -25,36 +25,32 @@ class ProductController extends Controller
     {
          $product = new Product();
          $product->product = $request->product;
-         $product->price = $request->price;
-         $product->stock = $request->stock;
-         $product->description = $request->description;
-         
          $product->save();
 
-        // Verifica si se proporciona un diseño en la solicitud
+        // Verificar si se proporciona un diseño en la solicitud
         if ($request->has('design')) {
-        $design = new Design();
-        $design->design = $request->design;
-        $product->designs()->save($design);
-    }
-     
-         return $product;
+            $design = new Design();
+            $design->design = $request->design;
+            $design->stock = $request->stock;
+            $design->description = $request->description;
+            $design->price = $request->price;
+
+            $product->designs()->save($design);
+        }
+        
+        return $product;
     }
 
     public function show(string $id)
     {
-        $product = Product::find($id);
+        $product = Product::with('designs')->find($id);
         return $product;
     }
 
     public function update(Request $request, string $id)
     {
-        $product = Product::findOrFail($request->id);
+        $product = Product::findOrFail($id);
         $product->product = $request->product;
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->description = $request->description;
-
         $product->save();
 
         // Verificar si se proporciona un diseño en la solicitud
@@ -65,11 +61,15 @@ class ProductController extends Controller
                 $design->product_id = $product->id; // Asignar el ID del producto al diseño
             }
             $design->design = $request->design;
+            $design->stock = $request->stock;
+            $design->description = $request->description;
+            $design->price = $request->price;
             $design->save();
+        }
+
+        return $product;
     }
 
-    return $product;
-    }
 
     /**
      * Remove the specified resource from storage.

@@ -276,16 +276,16 @@ const totalValue = filteredProducts.reduce((accumulator, product) => {
                     {product.designs.length > 0 ? product.designs[0].design : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.stock}
+                    {product.designs.length > 0 ? product.designs[0].stock : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    ${product.price}
+                    ${product.designs.length > 0 ? product.designs[0].price : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    ${product.price * product.stock}
+                    ${product.designs[0].stock * product.designs[0].price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.description}
+                    {product.designs.length > 0 ? product.designs[0].description : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {product.stock > 0 && product.stock <= 3
