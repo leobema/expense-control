@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AddPriceMp from "../components/AddPriceMp";
 import UpdatePriceMp from "../components/UpdatePriceMp";
+import { Dialog, Transition } from "@headlessui/react";
 import axios from 'axios'
 
 
@@ -14,6 +15,7 @@ function PricesItemsMp() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredPrices, setFilteredPrices] = useState([]);
     const [showItemModal, setShowItemModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
   useEffect ( () => {
@@ -41,11 +43,6 @@ function PricesItemsMp() {
     );
     setFilteredPrices(filtered);
   };
-
-  const showDeleteConfirmation = (id) => {
-    // Implement your logic for delete confirmation here
-  };
-
     // Modal for Product UPDATE
     const updatePriceModalSetting = (productId) => {
         setSelectedPriceId(productId);
@@ -60,6 +57,17 @@ function PricesItemsMp() {
 
   const handlePageUpdate = () => {
     getAllPrices();
+  };
+
+  const deletePrice = async (id) => {
+    try {
+        await axios.delete(`${endpoint}/prices/${id}`);
+        setShowDeleteModal(false);
+        setSelectedPriceId(id);
+        handlePageUpdate();
+    } catch (error) {
+        console.error("Error deleting price:", error);
+    }
   };
 
 
@@ -81,6 +89,58 @@ function PricesItemsMp() {
             handlePageUpdate={handlePageUpdate}
           /> 
           )} 
+
+          {/* Modal de confirmación para eliminar */} 
+          {showDeleteModal && (
+                    <Transition.Root show={true}>
+                    <Dialog
+                        as="div"
+                        className="fixed inset-0 overflow-y-auto flex items-center justify-center"
+                        onClose={() => setShowDeleteModal(false)}
+                    >
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                        <Transition.Child
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 translate-y-4"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-4"
+                        >
+                        <div className="relative top-20 mx-auto w-full max-w-lg">
+                            <div className="bg-white rounded-lg shadow-xl p-6">
+                            <div className="text-center">
+                                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                                Confirmar eliminación
+                                </Dialog.Title>
+                                <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                    ¿Estás seguro de que deseas eliminar este item? Esta acción no se puede deshacer.
+                                </p>
+                                </div>
+                            </div>
+                            <div className="mt-4 flex justify-center">
+                                <button
+                                type="button"
+                                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mr-3"
+                                onClick={() => deletePrice(selectedPriceId)}
+                                >
+                                Eliminar
+                                </button>
+                                <button
+                                type="button"
+                                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                onClick={() => setShowDeleteModal(false)}
+                                >
+                                Cancelar
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                        </Transition.Child>
+                    </Dialog>
+                </Transition.Root>
+                )}
 
 
        
@@ -123,6 +183,9 @@ function PricesItemsMp() {
                   Precio
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
+                  Última Actualización
+                </th>
+                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                   Acción
                 </th>
               </tr>
@@ -138,6 +201,9 @@ function PricesItemsMp() {
                     {price.price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    N/a
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                       <button
                         className="text-green-700 cursor-pointer"
                         
@@ -151,7 +217,10 @@ function PricesItemsMp() {
                       </button>
                       <span
                         className="text-red-600 px-2 cursor-pointer"
-                        onClick={() => showDeleteConfirmation(price.id)}
+                        onClick={() => {
+                          setShowDeleteModal(true)
+                          setSelectedPriceId(price.id)
+                        }}
                       >
                         Borrar
                       </span>

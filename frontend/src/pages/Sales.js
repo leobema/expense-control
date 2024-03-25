@@ -20,7 +20,7 @@ function Sales() {
   //const [showSaleModal, setShowSaleModal] = useState(false);
   // const [updatePage, setUpdatePage] = useState(true);
  
-    useEffect ( () => {
+    useEffect ( () => { 
       getAllSales()
     }, [])  
 

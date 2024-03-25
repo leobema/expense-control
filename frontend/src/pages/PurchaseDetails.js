@@ -1,65 +1,54 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import AddPurchaseDetails from "../components/AddPurchaseDetails";
-import UpdatePurchase from "../components/UpdatePurchase";
-import AuthContext from "../AuthContext";
+//import UpdatePurchase from "../components/UpdatePurchase";
+//import AuthContext from "../AuthContext";
+import axios from "axios";
+
+const endpoint = 'http://localhost:8000/api/'
 
 function PurchaseDetails() {
-  const [showPurchaseModal, setPurchaseModal] = useState(false);
-  const [updatePage, setUpdatePage] = useState(true);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [updatePurchase, setUpdatePurchase] = useState([]);
-
-  const authContext = useContext(AuthContext);
+  const [purchases, setPurchases] = useState(false);
+  const [filteredPurchases, setFilteredPurchases] = useState([]);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+ 
 
 
-  // Modal for Sale Add
-  const addPurchaseModalSetting = () => {
-    setPurchaseModal(!showPurchaseModal);
+  useEffect ( () => { 
+    getAllPurchases()
+  }, [])  
+
+  const getAllPurchases = async () => {
+    try {
+      const response = await axios.get(`${endpoint}purchases`);
+      setPurchases(response.data);
+      setFilteredPurchases(response.data); // Initialize filtered products with all sales
+    } catch (error) {
+      console.error("Error fetching sales:", error);
+    }
   };
-
-  // Modal for Product UPDATE
-  const updatePurchaseModalSetting = (selectedPurchaseData) => {
-    console.log("Clicked: edit");
-    setUpdatePurchase(selectedPurchaseData);
-    setShowUpdateModal(!showUpdateModal);
-  };
-
-
-  // Delete item
-  const deleteItem = (id) => {
-    console.log("Product ID: ", id);
-    console.log(`http://localhost:4000/api/purchase/delete/${id}`);
-    fetch(`http://localhost:4000/api/purchase/delete/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUpdatePage(!updatePage);
-      });
-  };
-
   
+  // Modal for Purchase Add
+  const addPurchaseModalSetting = () => {
+  setShowPurchaseModal(prevState => !prevState);
+};
 
-  // Handle Page Update  
-  const handlePageUpdate = () => {
-    setUpdatePage(!updatePage);
-  };
 
   return (
     <div className="col-span-12 lg:col-span-10 flex justify-center">
       <div className=" flex flex-col gap-5 w-11/12">
-        {showPurchaseModal && (
+         {showPurchaseModal && (
           <AddPurchaseDetails
             addPurchaseModalSetting={addPurchaseModalSetting}
-            handlePageUpdate={handlePageUpdate}
-            authContext = {authContext}
+            handlePageUpdate={getAllPurchases}
           />
-        )},
-         {showUpdateModal && (
+        )}
+        {/*  {showUpdateModal && (
           <UpdatePurchase
             updatePurchaseData={updatePurchase}
             updateModalSetting={updatePurchaseModalSetting}
             handlePageUpdate={handlePageUpdate}
           />
-        )}
+        )}  */}
 
         {/* Table  */}
         <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
@@ -80,19 +69,16 @@ function PurchaseDetails() {
             <thead>
               <tr>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Producto
+                  Item
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Diseño
+                  Precio
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Und Compradas
+                  Cant
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Costo/und
-                </th>
-                <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
-                  Total Costo $
+                  $ Total
                 </th>
                 <th className="whitespace-nowrap px-4 py-2 text-left font-medium text-gray-900">
                   Fecha
@@ -106,47 +92,45 @@ function PurchaseDetails() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-200">
-                  <tr>
+             <tbody className="divide-y divide-gray-200">
+                  {filteredPurchases.map((purchase) => ( 
+                  <tr key={purchase.id}>
                     <td className="whitespace-nowrap px-4 py-2  text-gray-900">
-                    text
+                    {purchase.name}
                     </td>
                      <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                     text
-                     
+                     {purchase.price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    {purchase.stock}
                     </td> 
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    ${purchase.stock * purchase.price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    {purchase.date}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
+                    {purchase.description}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    text
-                    </td> 
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                       <span
                         className="text-green-700 cursor-pointer"
-                        onClick={() => updatePurchaseModalSetting()}
+                       // onClick={() => updatePurchaseModalSetting()}
                         
                       >
                         Editar{" "}
                       </span>
                       <span
                         className="text-red-600 px-2 cursor-pointer"
-                        onClick={() => deleteItem()}
+                        //onClick={() => deleteItem()}
                       >
                         Borrar
                       </span>
                     </td>
                   </tr>
-            </tbody>
+            ))}
+            </tbody> 
           </table>
         </div>
       </div>

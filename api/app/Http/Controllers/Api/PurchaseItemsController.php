@@ -21,17 +21,13 @@ class PurchaseItemsController extends Controller
     public function store(Request $request)
     {
         $purchase = new PurchaseItemsMP();
-        $purchase->product = $request->product;
-        $purchase->design = $request->design;
-        $purchase->client = $request->client;
-        $purchase->stock = $request->stock;
-        $purchase->saleschannel = $request->saleschannel;
-        $purchase->methodpay = $request->methodpay;
+        $purchase->name = $request->name;
         $purchase->price = $request->price;
+        $purchase->stock = $request->stock;
         $purchase->date = $request->date;
         $purchase->description = $request->description;
         
-        $sale->save();
+        $purchase->save();
     }
 
 
@@ -45,13 +41,9 @@ class PurchaseItemsController extends Controller
     public function update(Request $request, string $id)
     {
         $purchase = PurchaseItemsMP::findOrFail($id);
-        $purchase->product = $request->product;
-        $purchase->design = $request->design;
-        $purchase->client = $request->client;
-        $purchase->stock = $request->stock;
-        $purchase->saleschannel = $request->saleschannel;
-        $purchase->methodpay = $request->methodpay;
+        $purchase->name = $request->name;
         $purchase->price = $request->price;
+        $purchase->stock = $request->stock;
         $purchase->date = $request->date;
         $purchase->description = $request->description;
         
