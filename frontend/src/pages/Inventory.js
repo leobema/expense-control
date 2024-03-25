@@ -4,6 +4,7 @@ import UpdateProduct from "../components/UpdateProduct";
 import AuthContext from "../AuthContext"; 
 //import { Link } from "react-router-dom";
 import axios from 'axios'
+import DeleteProduct from "../components/DeleteProduct";
 
 const endpoint = 'http://localhost:8000/api'
 
@@ -15,6 +16,8 @@ function Inventory() {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [ filteredProducts, setFilteredProducts ] = useState([]);
   const [searchTerm, setSearchTerm] = useState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
  
 
 
@@ -37,16 +40,17 @@ function Inventory() {
       console.error("Error fetching products:", error);
     }
   };
- 
-  const deleteProduct = async (id) => {
-    try {
-      await axios.delete(`${endpoint}/products/${id}`);
-      setProducts(products.filter(product => product.id !== id));
-      setFilteredProducts(filteredProducts.filter(product => product.id !== id));
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
+
+  // Modal de confirmación para eliminar un ítem
+  const showDeleteConfirmation = (id) => {
+    setShowDeleteModal(true);
+    setSelectedProductId(id); // Set the selected product ID
   };
+
+  const setItemToDelete = (id) => {
+    setSelectedProductId(id);
+  };
+
 
   // Modal for Product ADD
   const addProductModalSetting = () => {
@@ -77,6 +81,55 @@ const handleSearchTerm = (e) => {
   setFilteredProducts(filteredProducts);
 };
 
+// Función para calcular la suma total del valor de stock
+const calcularValorTotalStock = () => {
+  let total = 0;
+
+  // Iterar sobre cada producto y sumar el valor de su stock
+  products.forEach(product => {
+    if (product.designs.length > 0) {
+      total += product.designs[0].stock * product.designs[0].price;
+    }
+  });
+
+  return total;
+};
+
+// Función para calcular la suma total de unidades de stock
+const calcularUnidadesTotalesStock = () => {
+  let totalUnidades = 0;
+
+  // Iterar sobre cada producto y sumar la cantidad de stock de cada diseño
+  products.forEach(product => {
+    if (product.designs.length > 0) {
+      totalUnidades += product.designs.reduce((acc, curr) => acc + curr.stock, 0);
+    }
+  });
+
+  return totalUnidades;
+};
+
+// Función para calcular la cantidad de unidades de stock con diferentes estados
+const contarUnidadesPorEstado = (estado) => {
+  let count = 0;
+
+  // Iterar sobre cada producto y sumar la cantidad de stock con el estado dado
+  products.forEach(product => {
+    if (product.designs.length > 0) {
+      count += product.designs.filter(design => {
+        if (estado === "Stock Bajo") {
+          return design.stock > 0 && design.stock <= 3;
+        } else if (estado === "Sin Stock") {
+          return design.stock === 0;
+        }
+        return false;
+      }).length;
+    }
+  });
+
+  return count;
+};
+
 
   return (
     <div className="col-span-12 lg:col-span-10  flex justify-center">
@@ -102,7 +155,7 @@ const handleSearchTerm = (e) => {
               <div className="flex gap-8">
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-600 text-base">
-                   0{} 
+                   {calcularUnidadesTotalesStock()} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Stock
@@ -110,7 +163,7 @@ const handleSearchTerm = (e) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-600 text-base">
-                     $0{} 
+                     ${calcularValorTotalStock()}  
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Valor
@@ -125,7 +178,7 @@ const handleSearchTerm = (e) => {
               <div className="flex gap-8">
                 <div className="flex flex-col">
                   <span className="font-semibold text-yellow-600 text-base">
-                   0{} 
+                  {contarUnidadesPorEstado("Stock Bajo")} 
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Stock Bajo
@@ -133,7 +186,7 @@ const handleSearchTerm = (e) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-red-600 text-base">
-                   0{} 
+                  {contarUnidadesPorEstado("Sin Stock")}
                   </span>
                   <span className="font-thin text-gray-400 text-xs">
                     Sin Stock
@@ -181,6 +234,22 @@ const handleSearchTerm = (e) => {
             handlePageUpdate={handlePageUpdate}
           /> 
           )}
+
+        {showDeleteModal && (
+          <DeleteProduct 
+            productId={selectedProductId}
+            showDeleteModal={showDeleteModal}
+            setShowDeleteModal={setShowDeleteModal}
+            endpoint={endpoint}
+            setProducts={setProducts}
+            products={products}
+            setFilteredProducts={setFilteredProducts}
+            filteredProducts={filteredProducts}
+            showDeleteConfirmation={showDeleteConfirmation}
+            setItemToDelete={setItemToDelete}
+          />
+        )}
+
 
        
         {/* Table  */}
@@ -253,21 +322,21 @@ const handleSearchTerm = (e) => {
                     {product.designs.length > 0 ? product.designs[0].design : 'No Design'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.designs.length > 0 ? product.designs[0].stock : 'No Design'}
+                    {product.designs.length > 0 ? product.designs[0].stock : 'No Stock'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    ${product.designs.length > 0 ? product.designs[0].price : 'No Design'}
+                    ${product.designs.length > 0 ? product.designs[0].price : 'No Price'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     ${product.designs[0].stock * product.designs[0].price}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.designs.length > 0 ? product.designs[0].description : 'No Design'}
+                    {product.designs.length > 0 ? product.designs[0].description : 'No Description'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {product.stock > 0 && product.stock <= 3
+                    {product.designs[0].stock > 0 && product.designs[0].stock <= 3
                       ? "Stock Bajo 🔰"
-                      : product.stock > 3
+                      : product.designs[0].stock > 3
                       ? "Stock ✅"
                       : 'Sin Stock ❗'}
                     </td>
@@ -285,15 +354,17 @@ const handleSearchTerm = (e) => {
                       </button>
                       <span
                         className="text-red-600 px-2 cursor-pointer"
-                        onClick={() => deleteProduct(product.id)}
+                        onClick={() => showDeleteConfirmation(product.id)}
                       >
                         Borrar
                       </span>
+                      
                     </td>
                   </tr>
                   ))}
             </tbody>
           </table>
+          
         </div>
       </div>
     </div>
