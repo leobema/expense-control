@@ -36,7 +36,7 @@ function Sales() {
   
     const deleteSale = async (id) => {
       try {
-        await axios.delete(`${endpoint}/sale/${id}`);
+        await axios.delete(`${endpoint}/sales/${id}`);
         setSales(sales.filter(sale => sale.id !== id));
         setFilteredSales(filteredSales.filter(sale => sale.id !== id));
       } catch (error) {
@@ -197,6 +197,7 @@ const handleSearchTerm = (e) => {
            updateProductData={updateSale}
            updateModalSetting={updateProductModalSetting}
            handlePageUpdate={getAllSales}
+           //design={filteredSales.find(sale => sale.id === selectedSaleId)?.design}
           /> 
           )}
        
@@ -271,7 +272,9 @@ const handleSearchTerm = (e) => {
 
             <tbody className="divide-y divide-gray-200">
             {filteredSales.map((sale) => ( 
+             
                   <tr key={sale.id}>
+                    
                     <td className="whitespace-nowrap px-4 py-2  text-gray-900">
                     {sale.product}
                     </td>

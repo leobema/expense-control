@@ -17,6 +17,6 @@ class Sale extends Model
         'saleschannel', 
         'price', 
         'stock', 
-        'date',
+        'date'
     ];
 }

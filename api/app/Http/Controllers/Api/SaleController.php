@@ -44,7 +44,7 @@ class SaleController extends Controller
     
     public function update(Request $request, string $id)
     {
-        $sale = Sale::findOrFail($request->id);
+        $sale = Sale::findOrFail($id);
          $sale->product = $request->product;
          $sale->design = $request->design;
          $sale->client = $request->client;

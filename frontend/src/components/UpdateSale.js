@@ -5,23 +5,27 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const endpoint = 'http://localhost:8000/api/sale/'
+const endpoint = 'http://localhost:8000/api/sales/'
 const endpoint2 = 'http://localhost:8000/api'
 
 const UpdateSale = ({saleId}) => {
 
   const [products, setProducts] = useState([]); // Estado para almacenar los productos disponibles
-  const [product, setProduct] = useState('')
-  const [design, setDesign] = useState('')
-  const [client, setClient] = useState('')
-  const [stock, setStock] = useState(0)
-  const [price, setPrice] = useState(0)
-  const [description, setDescription] = useState('')
-  const [date, setDate] = useState('')
-  const [saleschannel, setSalesChannel] = useState('')
-  const [methodpay, setMethodPay] = useState('')
+  const [product, setProduct] = useState('');
+  const [availableDesigns, setAvailableDesigns] = useState([]);
+  //const [designState, setDesign] = useState(design);
+  const [design, setDesign] = useState('');
+  //const [designState, setDesignState] = useState('');
+  const [client, setClient] = useState('');
+  const [stock, setStock] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [saleschannel, setSalesChannel] = useState('');
+  const [methodpay, setMethodPay] = useState('');
   const [selectedDesignStock, setSelectedDesignStock] = useState(0);
-  const navigate = useNavigate()
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const update = async (e) => {
     e.preventDefault()
@@ -39,7 +43,7 @@ const UpdateSale = ({saleId}) => {
     // Cerrar el modal y recargar la página
     setOpen(false);
     window.location.reload();
-    navigate('/sales')
+    navigate('/sales') 
   }
 
   useEffect( () =>{
@@ -57,15 +61,25 @@ const UpdateSale = ({saleId}) => {
         setSalesChannel(saleschannel);
         setMethodPay(methodpay);
         setDescription(description);
-      } catch (error) {
-        console.error('Error fetching product:', error);
+        
+      const selectedProducts = products.filter(product => product.product === product);
+      if (selectedProducts.length > 0) {
+        const allDesigns = selectedProducts.reduce((accumulator, currentProduct) => {
+          accumulator.push(...currentProduct.designs);
+          return accumulator;
+        }, []);
+        setAvailableDesigns(allDesigns);
       }
-    };
-
-    if (saleId) {
-      getSaleById();
+    } catch (error) {
+      console.error('Error fetching product:', error);
     }
+  };
 
+  if (saleId) {
+    setOpen(true); // Abre el modal al cargar los datos de la venta
+    getSaleById();
+  }
+}, [saleId, products]); // Agregar products a las dependencias del efecto
 
     // Función para obtener la lista de productos disponibles al cargar la página
     const fetchProducts = async () => {
@@ -76,45 +90,50 @@ const UpdateSale = ({saleId}) => {
         console.error("Error fetching products:", error);
       }
     };
-
+    useEffect( () =>{
     fetchProducts();
+  }, []);
 
-   
-  }, [saleId]);
-
-  const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
 
-      // Obtener un conjunto de nombres únicos de productos
-const uniqueProductNames = new Set(products.map(product => product.product));
-
-// Convertir el conjunto en una matriz para poder mapear
-const uniqueProductNamesArray = Array.from(uniqueProductNames);
-
-// Obtener una lista de todos los diseños asociados al producto seleccionado
-const selectedProductDesigns = products
-  .filter(prod => prod.product === product) // Filtrar productos que coincidan con el seleccionado
-  .map(prod => ({
-    design: prod.design,
-    stock: prod.stock,
-    price: prod.price,
-  })); // Obtener una lista de todos los diseños
+const handleProductChange = (e) => {
+  const selectedProductName = e.target.value;
+  setProduct(selectedProductName);
+  const selectedProducts = products.filter(product => product.product === selectedProductName);
+  if (selectedProducts.length > 0) {
+    const allDesigns = selectedProducts.reduce((accumulator, currentProduct) => {
+      accumulator.push(...currentProduct.designs);
+      return accumulator;
+    }, []);
+    setAvailableDesigns(allDesigns);
+    setDesign('');
+    setStock(0);
+    setPrice(0);
+    setSelectedDesignStock(0);
+  } else {
+    // Si no hay productos seleccionados, resetear las variables relacionadas con el diseño
+    setAvailableDesigns([]);
+    setDesign('');
+    setStock(0);
+    setPrice(0);
+    setSelectedDesignStock(0);
+  } 
+};
 
   // Función para manejar el cambio de diseño seleccionado
-const handleDesignChange = (e) => {
-  const selectedDesign = e.target.value;
-  const designInfo = selectedProductDesigns.find(design => design.design === selectedDesign);
-  if (designInfo) {
-    setDesign(selectedDesign);
-    setStock(designInfo.stock);
-    setPrice(designInfo.price);
-    setSelectedDesignStock(designInfo.stock); // Definir selectedDesignStock
-  }
-}
+  const handleDesignChange = (e) => {
+    const selectedDesignName = e.target.value; // Usamos el nombre del diseño en lugar de su identificador
+    setDesign(selectedDesignName); // Establecemos el estado design con el nombre del diseño seleccionado
+    const selectedDesignInfo = availableDesigns.find(design => design.design === selectedDesignName);
+    if (selectedDesignInfo) {
+      setStock(selectedDesignInfo.stock);
+      setPrice(selectedDesignInfo.price);
+      setSelectedDesignStock(selectedDesignInfo.stock);
+    }
+  };
+  
 
-
-
-  return (
+   return (
     // Modal
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -170,43 +189,31 @@ const handleDesignChange = (e) => {
                             >
                               Producto
                             </label>
-                            <select
+                            <input
                               value={product}
-                              onChange={(e) => setProduct(e.target.value)}
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                            >
-                              <option value="" disabled>
-                                Seleccione un producto
-                              </option>
-                              {uniqueProductNamesArray.map(productName => (
-                                <option key={productName} value={productName}>
-                                  {productName}
-                                </option>
-                              ))}
-                            </select>
+                              onChange={handleProductChange}
+                              className="bg-gray-50 border border-gray-300 text-gray-400 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                              disabled
+                            />
                           </div>
                         </div>
                         <div className="grid grid-flow-row gap-4 my-4 grid-cols-2">
                           <div className="col-span-2">
                               <div className="grid gap-4 my-2 grid-cols-1">
+                                
                                   <div>
                                     <label
                                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                     >
                                       Diseño 
                                     </label>
-                                    <select
+                                    <input
                                       value={design}
                                       onChange={handleDesignChange}
-                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    >
-                                      <option value="">Seleccionar Diseño</option>
-                                      {selectedProductDesigns.map(design => (
-                                        <option key={design.design} value={design.design}>
-                                          {design.design}
-                                        </option>
-                                      ))}
-                                    </select>
+                                      className="bg-gray-50 border border-gray-300 text-gray-400 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      disabled
+                                  />
+                                    
                                   </div>
                                   <div className="grid gap-4 my-2 grid-cols-2">
                                   <div>
@@ -218,14 +225,15 @@ const handleDesignChange = (e) => {
                                     <input
                                       type="number"
                                       value={stock}
+                                      disabled
                                       onChange={(e) => {
                                         const inputValue = parseInt(e.target.value);
-                                        // Verificar que el valor ingresado no sea mayor al stock existente ni igual a 0
+                                       // Verificar que el valor ingresado no sea mayor al stock existente ni igual a 0
                                         if (!isNaN(inputValue) && inputValue > 0 && inputValue <= selectedDesignStock) {
                                           setStock(inputValue);
                                         }
                                       }}
-                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                      className="bg-gray-50 border border-gray-300 text-gray-400 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                     />
                                   </div>
                                   <div>
@@ -237,7 +245,13 @@ const handleDesignChange = (e) => {
                                   <input
                                     type="number"
                                     value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
+                                    onChange={(e) => {
+                                      const inputValue = setPrice(e.target.value);
+                                      // Verificar que el valor ingresado sea un número válido
+                                      if (!isNaN(inputValue)) {
+                                        setPrice(inputValue);
+                                      }
+                                    }}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                   />
                                   </div>
@@ -355,6 +369,6 @@ const handleDesignChange = (e) => {
       </Dialog>
     </Transition.Root>
   );
-}
+} 
 
 export default UpdateSale

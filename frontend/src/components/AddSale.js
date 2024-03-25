@@ -36,6 +36,7 @@ const CreateSale = () => {
     fetchData();
   }, []);
 
+
 /*   const groupProducts = (data) => {
     const productsArray = [];
     data.forEach((item) => {
@@ -87,7 +88,8 @@ const CreateSale = () => {
 
   const handleDesignChange = (e) => {
     const selectedDesignId = parseInt(e.target.value);
-    setDesign(selectedDesignId);
+    const selectedDesign = availableDesigns.find(design => design.id === selectedDesignId);
+    setDesign(selectedDesign.design);
     const selectedDesignInfo = availableDesigns.find(design => design.id === selectedDesignId);
     if (selectedDesignInfo) {
       setStock(selectedDesignInfo.stock);
