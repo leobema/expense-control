@@ -20,7 +20,7 @@ class SaleController extends Controller
     
     public function store(Request $request)
     {
-        $sale = new Sale();
+         $sale = new Sale();
          $sale->product = $request->product;
          $sale->design = $request->design;
          $sale->client = $request->client;
@@ -44,7 +44,7 @@ class SaleController extends Controller
     
     public function update(Request $request, string $id)
     {
-        $sale = Sale::findOrFail($id);
+         $sale = Sale::findOrFail($id);
          $sale->product = $request->product;
          $sale->design = $request->design;
          $sale->client = $request->client;

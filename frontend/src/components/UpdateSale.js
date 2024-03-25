@@ -46,7 +46,7 @@ const UpdateSale = ({saleId}) => {
     navigate('/sales') 
   }
 
-  useEffect( () =>{
+  useEffect( () =>{ 
 
     const getSaleById = async () => {
       try {

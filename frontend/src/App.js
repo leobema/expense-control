@@ -7,6 +7,7 @@ import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Inventory from "./pages/Inventory";
+import PricesItemsMp from "./pages/PricesItemsMp";
 import NoPageFound from "./pages/NoPageFound";
 import AuthContext from "./AuthContext";
 import ProtectedWrapper from "./ProtectedWrapper";
@@ -74,6 +75,7 @@ const App = () => {
           >
             <Route index element={<Dashboard />} />
             <Route path="/inventory" element={<Inventory />} />
+            <Route path="/PriceItemsMp" element={<PricesItemsMp />} />
             <Route path="/update-product/:id" component={<UpdateProduct />} />
             <Route path="/purchase-details" element={<PurchaseDetails />} />
             <Route path="/sales" element={<Sales />} />

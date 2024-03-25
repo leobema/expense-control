@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import AddSale from '../components/AddSale'
-import UpdateSale from '../components/UpdateSale'
+import AddSale from '../components/AddSale';
+import UpdateSale from '../components/UpdateSale';
+import DeleteSale from "../components/DeleteSale"; 
 import axios from 'axios'
 //import AuthContext from "../AuthContext";
 
@@ -8,12 +9,13 @@ const endpoint = 'http://localhost:8000/api'
 
 function Sales() {
   const [selectedSaleId, setSelectedSaleId] = useState(null); 
-  const [ sales, setSales ] = useState ([]);
+  const [sales, setSales ] = useState ([]);
   const [updateSale, setUpdateSale] = useState([]);
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [ filteredSales, setFilteredSales ] = useState([]);
   const [searchTerm, setSearchTerm] = useState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   //const [showAddModal, setShowAddModal] = useState(false); 
   //const [showSaleModal, setShowSaleModal] = useState(false);
   // const [updatePage, setUpdatePage] = useState(true);
@@ -33,17 +35,16 @@ function Sales() {
     };
 
 
-  
-    const deleteSale = async (id) => {
-      try {
-        await axios.delete(`${endpoint}/sales/${id}`);
-        setSales(sales.filter(sale => sale.id !== id));
-        setFilteredSales(filteredSales.filter(sale => sale.id !== id));
-      } catch (error) {
-        console.error("Error deleting sale:", error);
-      }
-    };
 
+    // Modal de confirmación para eliminar un ítem
+  const showDeleteConfirmation = (id) => {
+    setShowDeleteModal(true);
+    setSelectedSaleId(id); // Set the selected product ID
+  };
+
+  const setItemToDelete = (id) => {
+    setSelectedSaleId(id);
+  };
 
     // Modal for Sale ADD
     const addSaleModalSetting = () => {
@@ -200,6 +201,21 @@ const handleSearchTerm = (e) => {
            //design={filteredSales.find(sale => sale.id === selectedSaleId)?.design}
           /> 
           )}
+
+        {showDeleteModal && (
+          <DeleteSale 
+            saleId={selectedSaleId}
+            showDeleteModal={showDeleteModal}
+            setShowDeleteModal={setShowDeleteModal}
+            endpoint={endpoint}
+            setSales={setSales}
+            sales={sales}
+            setFilteredSales={setFilteredSales}
+            filteredSales={filteredSales}
+            showDeleteConfirmation={showDeleteConfirmation}
+            setItemToDelete={setItemToDelete}
+          />
+        )}
        
         {/* Table  */}
         <div className="overflow-x-auto rounded-lg border bg-white border-gray-200 ">
@@ -318,7 +334,7 @@ const handleSearchTerm = (e) => {
                       </span>
                       <span
                         className="text-red-600 px-2 cursor-pointer"
-                        onClick={() => deleteSale(sale.id)}
+                        onClick={() => showDeleteConfirmation(sale.id)}
                       >
                         Borrar
                       </span>

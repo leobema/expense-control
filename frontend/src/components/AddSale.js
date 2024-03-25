@@ -284,33 +284,41 @@ const uniqueProductNames = Array.from(new Set(products.map(product => product.pr
                                     />
                                   </div>
                                
-                                <div>
-                                  <label
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                  >
-                                    Canal de venta
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={saleschannel}
-                                    onChange={ (e)=> setSalesChannel(e.target.value)}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="ej. Mercadolibre"
-                                  />
-                                </div>
+                                  <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                      Canal de venta
+                                    </label>
+                                    <select
+                                      value={saleschannel}
+                                      onChange={(e) => setSalesChannel(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    >
+                                      <option value="Mercadolibre">Mercadolibre</option>
+                                      <option value="Pág Web">Pág Web</option>
+                                      <option value="Facebook">Facebook</option>
+                                      <option value="Instagram">Instagram</option>
+                                      <option value="Referencia">Referencia</option>
+                                      <option value="Cliente Recurrente">Cliente Recurrente</option>
+                                    </select>
+                                  </div>
                                 <div>
                                   <label
                                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                   >
                                     Método de Pago
                                   </label>
-                                  <input
-                                    type="text"
-                                    value={methodpay}
-                                    onChange={ (e)=> setMethodPay(e.target.value)}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                    placeholder="ej. Efectivo"
-                                  />
+                                  <select
+                                      value={methodpay}
+                                      onChange={(e) => setMethodPay(e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    >
+                                      <option value="Efectivo">Efectivo</option>
+                                      <option value="Transferencia">Transferencia</option>
+                                      <option value="MercadoPago">MercadoPago</option>
+                                      <option value="MP Venta de ML">MP Venta de ML</option>
+                                      <option value="MP Venta Pág Web">MP Venta Pág Web</option>
+                                      <option value="Uala Venta Pág Web">Uala Venta Pág Web</option>
+                                    </select>
                                 </div>
                                 <div>
                                   <label

@@ -48,7 +48,7 @@ function Inventory() {
   };
 
   const setItemToDelete = (id) => {
-    setSelectedProductId(id);
+    setSelectedProductId(id); 
   };
 
 
